@@ -170,7 +170,12 @@ func (s *RaftSurfstore) UpdateFile(ctx context.Context, filemeta *FileMetaData) 
 // }
 
 func (s *RaftSurfstore) sendToFollower(dummyAppendEntriesInput *AppendEntryInput, addr string, ctx context.Context, idx int) {
-
+	if s.isCrashed {
+		return
+	}
+	if !s.isLeader {
+		return 
+	}
 	conn, _ := grpc.Dial(addr, grpc.WithInsecure())
 	client := NewRaftSurfstoreClient(conn)
 	for {
@@ -348,7 +353,7 @@ func (s *RaftSurfstore) SendHeartbeat(ctx context.Context, _ *emptypb.Empty) (*S
 		}
 
 		//Wait until next iteration of heartbeats
-		time.Sleep(1 * time.Second)
+		time.Sleep(3 * time.Second)
 	}
 
 	return nil, nil
