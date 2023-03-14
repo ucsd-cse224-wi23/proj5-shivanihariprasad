@@ -371,6 +371,7 @@ func (s *RaftSurfstore) Crash(ctx context.Context, _ *emptypb.Empty) (*Success, 
 	s.isCrashed = true
 	s.isCrashedMutex.Unlock()
 	time.Sleep(1*time.Second)
+	fmt.Println("crashing server")
 	return &Success{Flag: true}, nil
 }
 
