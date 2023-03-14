@@ -42,9 +42,10 @@ func (s *RaftSurfstore) GetFileInfoMap(ctx context.Context, empty *emptypb.Empty
 	if !s.isLeader {
 		return nil, ERR_NOT_LEADER
 	}
-	// if !s.MajorityCheck(ctx) {
-	// 	return nil, ERR_NO_MAJORITY
-	// }
+	if !s.MajorityCheck(ctx) {
+		fmt.Println("checking for majority in GetFileInfoMap")
+		return nil, ERR_NO_MAJORITY
+	}
 	return s.metaStore.GetFileInfoMap(ctx, empty)
 	//return nil, nil
 }
@@ -58,9 +59,10 @@ func (s *RaftSurfstore) GetBlockStoreMap(ctx context.Context, hashes *BlockHashe
 	if !s.isLeader {
 		return nil, ERR_NOT_LEADER
 	}
-	// if !s.MajorityCheck(ctx) {
-	// 	return nil, ERR_NO_MAJORITY
-	// }
+	if !s.MajorityCheck(ctx) {
+		fmt.Println("checking for majority in GetBlockStoreMap")
+		return nil, ERR_NO_MAJORITY
+	}
 	return s.metaStore.GetBlockStoreMap(ctx, hashes)
 }
 
@@ -73,9 +75,10 @@ func (s *RaftSurfstore) GetBlockStoreAddrs(ctx context.Context, empty *emptypb.E
 	if !s.isLeader {
 		return nil, ERR_NOT_LEADER
 	}
-	// if !s.MajorityCheck(ctx) {
-	// 	return nil, ERR_NO_MAJORITY
-	// }
+	if !s.MajorityCheck(ctx) {
+		fmt.Println("checking for majority in GetBlockStoreAddrs")
+		return nil, ERR_NO_MAJORITY
+	}
 	return s.metaStore.GetBlockStoreAddrs(ctx, empty)
 }
 
@@ -92,8 +95,8 @@ func (s *RaftSurfstore) UpdateFile(ctx context.Context, filemeta *FileMetaData) 
 		FileMetaData: filemeta,
 	})
 	fmt.Println("Check if we are setting s.log properly", s.log)
-	commitChan := make(chan bool)
-	s.pendingCommits = append(s.pendingCommits, &commitChan)
+	// commitChan := make(chan bool)
+	// s.pendingCommits = append(s.pendingCommits, &commitChan)
 	//get the index of the current log
 	//idx := len(s.log) - 1
 	// send entry to all followers in parallel
@@ -101,7 +104,7 @@ func (s *RaftSurfstore) UpdateFile(ctx context.Context, filemeta *FileMetaData) 
 	output, err := s.SendHeartbeat(ctx, &emptypb.Empty{})
 	// keep trying indefinitely (even after responding) ** rely on sendheartbeat
 	if err != nil {
-		log.Println("Issue with sendheartbeat", err)
+		fmt.Println("Issue with sendheartbeat", err)
 		return nil, err
 	}
 	// commit the entry once majority of followers have it in their log
@@ -300,10 +303,10 @@ func (s *RaftSurfstore) SendHeartbeat(ctx context.Context, _ *emptypb.Empty) (*S
 		responses := 1
 		for idx, addr := range s.peers {
 			if s.isCrashed {
-				return nil, ERR_SERVER_CRASHED
+				return &Success{Flag: false}, ERR_SERVER_CRASHED
 			}
 			if !s.isLeader {
-				return nil, ERR_NOT_LEADER
+				return &Success{Flag: false}, ERR_NOT_LEADER
 			}
 			if int64(idx) == s.id {
 				continue
