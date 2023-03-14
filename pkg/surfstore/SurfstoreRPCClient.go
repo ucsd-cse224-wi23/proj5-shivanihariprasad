@@ -73,6 +73,7 @@ func (surfClient *RPCClient) GetFileInfoMap(serverFileInfoMap *map[string]*FileM
 		if err != nil {
 			return err
 		}
+		defer conn.Close()
 		c := NewRaftSurfstoreClient(conn)
 
 		// perform the call
@@ -82,19 +83,15 @@ func (surfClient *RPCClient) GetFileInfoMap(serverFileInfoMap *map[string]*FileM
 
 		if err != nil {
 			if strings.Contains(err.Error(), "Server is crashed") {
-				conn.Close()
 				continue
 			}
 			if strings.Contains(err.Error(), "Server is not the leader") {
-				conn.Close()
 				continue
 			}
 			if strings.Contains(err.Error(), "No majority from followers") {
-				conn.Close()
-				return err
+				continue
 			}
 			log.Println("Error setting fileinfomap", err)
-			conn.Close()
 			continue
 
 		}
@@ -104,7 +101,6 @@ func (surfClient *RPCClient) GetFileInfoMap(serverFileInfoMap *map[string]*FileM
 			(*serverFileInfoMap)[key] = value
 		}
 
-		return conn.Close()
 	}
 	return nil
 
@@ -116,6 +112,7 @@ func (surfClient *RPCClient) UpdateFile(fileMetaData *FileMetaData, latestVersio
 		if err != nil {
 			return err
 		}
+		defer conn.Close()
 		c := NewRaftSurfstoreClient(conn)
 
 		// perform the call
@@ -123,24 +120,20 @@ func (surfClient *RPCClient) UpdateFile(fileMetaData *FileMetaData, latestVersio
 		defer cancel()
 		b, err := c.UpdateFile(ctx, fileMetaData)
 		if err != nil {
+			fmt.Println("Error setting UpdateFile", err)
 			if strings.Contains(err.Error(), "Server is crashed") {
-				conn.Close()
 				continue
 			}
 			if strings.Contains(err.Error(), "Server is not the leader") {
-				conn.Close()
 				continue
 			}
 			if strings.Contains(err.Error(), "No majority from followers") {
-				conn.Close()
-				return err
+				continue
 			}
 			fmt.Println("Error setting UpdateFile", err)
-			conn.Close()
 			continue
 		}
 		*latestVersion = b.Version
-		return conn.Close()
 	}
 	return nil
 }
@@ -172,6 +165,7 @@ func (surfClient *RPCClient) GetBlockStoreMap(blockHashesIn []string, blockStore
 		if err != nil {
 			return err
 		}
+		defer conn.Close()
 		c := NewRaftSurfstoreClient(conn)
 
 		// perform the call
@@ -179,26 +173,22 @@ func (surfClient *RPCClient) GetBlockStoreMap(blockHashesIn []string, blockStore
 		defer cancel()
 		b, err := c.GetBlockStoreMap(ctx, &BlockHashes{Hashes: blockHashesIn})
 		if err != nil {
+			fmt.Println("Error setting GetBlockStoreMap", err)
 			if strings.Contains(err.Error(), "Server is crashed") {
-				conn.Close()
 				continue
 			}
 			if strings.Contains(err.Error(), "Server is not the leader") {
-				conn.Close()
 				continue
 			}
 			if strings.Contains(err.Error(), "No majority from followers") {
-				conn.Close()
-				return err
+				continue
 			}
 			log.Println("Error setting GetBlockStoreMap", err)
-			conn.Close()
 			continue
 		}
 		for key, value := range (*b).BlockStoreMap {
 			(*blockStoreMap)[key] = (*value).Hashes
 		}
-		return conn.Close()
 	}
 	return nil
 }
@@ -209,6 +199,7 @@ func (surfClient *RPCClient) GetBlockStoreAddrs(blockStoreAddrs *[]string) error
 		if err != nil {
 			return err
 		}
+		defer conn.Close()
 		c := NewRaftSurfstoreClient(conn)
 
 		// perform the call
@@ -219,25 +210,21 @@ func (surfClient *RPCClient) GetBlockStoreAddrs(blockStoreAddrs *[]string) error
 		//fmt.Println("check adddr", b.BlockStoreAddrs)
 
 		if err != nil {
+			fmt.Println("Error setting GetBlockStoreAddrs", err)
 			if strings.Contains(err.Error(), "Server is crashed") {
-				conn.Close()
 				continue
 			}
 			if strings.Contains(err.Error(), "Server is not the leader") {
-				conn.Close()
 				continue
 			}
 			if strings.Contains(err.Error(), "No majority from followers") {
-				conn.Close()
 				return err
 			}
 			log.Println("Error setting GetBlockStoreAddrs", err)
-			conn.Close()
 			continue
 		}
 
 		*blockStoreAddrs = b.BlockStoreAddrs
-		return conn.Close()
 	}
 	return nil
 }
