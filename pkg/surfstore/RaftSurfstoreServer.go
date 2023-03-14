@@ -335,7 +335,12 @@ func (s *RaftSurfstore) SendHeartbeat(ctx context.Context, _ *emptypb.Empty) (*S
 			}
 			//fmt.Println("Check entry", dummyAppendEntriesInput)
 			output, err := client.AppendEntries(ctx, &dummyAppendEntriesInput)
-			if err == nil && output.Success {
+			if err != nil {
+				fmt.Println("Error in sending heartbeat from leader", s.id, err)
+				continue
+			}
+
+			if output.Success {
 				//update count on only successful return value
 				responses++
 				if len(s.log) > 0 {
