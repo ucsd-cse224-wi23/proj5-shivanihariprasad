@@ -101,10 +101,10 @@ func (surfClient *RPCClient) GetFileInfoMap(serverFileInfoMap *map[string]*FileM
 		for key, value := range (*val).FileInfoMap {
 			(*serverFileInfoMap)[key] = value
 		}
-
+		return nil
 	}
-	return nil
 
+	return fmt.Errorf(" error in GetFileInfoMap")
 }
 
 func (surfClient *RPCClient) UpdateFile(fileMetaData *FileMetaData, latestVersion *int32) error {
@@ -135,8 +135,9 @@ func (surfClient *RPCClient) UpdateFile(fileMetaData *FileMetaData, latestVersio
 			continue
 		}
 		*latestVersion = b.Version
+		return nil
 	}
-	return nil
+	return fmt.Errorf(" error in UpdateFile")
 }
 
 func (surfClient *RPCClient) GetBlockHashes(blockStoreAddr string, blockHashes *[]string) error {
@@ -190,8 +191,9 @@ func (surfClient *RPCClient) GetBlockStoreMap(blockHashesIn []string, blockStore
 		for key, value := range (*b).BlockStoreMap {
 			(*blockStoreMap)[key] = (*value).Hashes
 		}
+		return nil
 	}
-	return nil
+	return fmt.Errorf(" error in GetBlockStoreMap")
 }
 
 func (surfClient *RPCClient) GetBlockStoreAddrs(blockStoreAddrs *[]string) error {
@@ -226,8 +228,9 @@ func (surfClient *RPCClient) GetBlockStoreAddrs(blockStoreAddrs *[]string) error
 		}
 
 		*blockStoreAddrs = b.BlockStoreAddrs
+		return nil
 	}
-	return nil
+	return fmt.Errorf(" error in GetBlockStoreAddrs")
 }
 
 // This line guarantees all method for RPCClient are implemented
