@@ -82,6 +82,7 @@ func (surfClient *RPCClient) GetFileInfoMap(serverFileInfoMap *map[string]*FileM
 		val, err := c.GetFileInfoMap(ctx, &empty.Empty{})
 
 		if err != nil {
+			fmt.Println("Error getting fileinfomap", err)
 			if strings.Contains(err.Error(), "Server is crashed") {
 				continue
 			}
@@ -218,7 +219,7 @@ func (surfClient *RPCClient) GetBlockStoreAddrs(blockStoreAddrs *[]string) error
 				continue
 			}
 			if strings.Contains(err.Error(), "No majority from followers") {
-				return err
+				continue
 			}
 			log.Println("Error setting GetBlockStoreAddrs", err)
 			continue

@@ -184,7 +184,7 @@ func (s *RaftSurfstore) sendToFollower(dummyAppendEntriesInput *AppendEntryInput
 	for {
 		output, err := client.AppendEntries(ctx, dummyAppendEntriesInput)
 		if err != nil {
-			log.Println("error is trying to append the entries to server", err)
+			fmt.Println("error is trying to append the entries to server", err)
 			return
 		}
 		fmt.Println("Retry send to follower", output, err)
@@ -399,7 +399,7 @@ func (s *RaftSurfstore) GetInternalState(ctx context.Context, empty *emptypb.Emp
 		MetaMap:  fileInfoMap,
 	}
 	s.isLeaderMutex.RUnlock()
-
+	fmt.Println("Internal state", state )
 	return state, nil
 }
 
